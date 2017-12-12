@@ -2,7 +2,6 @@
 
 const gulp = require('gulp');
 const browserSync = require('browser-sync').create();
-const livereload = require('gulp-livereload');
 const del = require('del');
 const postcss = require('gulp-postcss');
 const autoprefixer = require('autoprefixer');
@@ -19,6 +18,8 @@ const cssnano = require('cssnano');
 const notify = require('gulp-notify');
 const sourcemaps = require('gulp-sourcemaps');
 const pug = require('gulp-pug');
+const messages = require('postcss-browser-reporter')
+const plumber = require('gulp-plumber');
 
 // Clean =================================
 gulp.task('clean', function() { 
@@ -28,6 +29,8 @@ gulp.task('clean', function() {
 // Pages =================================
 gulp.task('pug', function() {
 	return gulp.src('./src/pug/*.pug')
+        .pipe(plumber())
+        // .pipe(reporter())
 		.pipe(pug({pretty: true}))  //с переносом pretty: true
 		.pipe(gulp.dest('build'))
 });
@@ -42,6 +45,9 @@ gulp.task('styles:vendor', function() {
 gulp.task('styles', function () {
     var processors = [
     	Import,
+        messages({
+            selector: 'body::before'
+        }),
         autoprefixer({browsers: ['last 3 version']}),
     	cssnext({
     		'customProperties': true,
@@ -57,7 +63,7 @@ gulp.task('styles', function () {
     	}),
         mqpacker({
             sort: true
-          })
+        })
     ];
     return gulp.src('./src/styles/style.css')
         .pipe(postcss(processors))
